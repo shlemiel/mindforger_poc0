@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     // - https://stackoverflow.com/questions/35432749/disable-web-security-in-chrome-48
     //   ^ changes in required parameters with disable-web-security
     //
-#if defined(__APPLE__) || defined(_WIN32)
+#if 0 && (defined(__APPLE__) || defined(_WIN32))
   #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     char ARG_DISABLE_WEB_SECURITY[] = "--disable-web-security";
     int newArgc = argc + 1 + 1;

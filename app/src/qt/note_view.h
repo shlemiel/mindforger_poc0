@@ -95,7 +95,7 @@ public:
     void setZoomFactor(qreal factor) {
         noteViewer->setZoomFactor(factor);
     }
-    void setHtml(const QString& html, const QUrl& baseUrl = QUrl()) {
+    void setHtml(const QString& html, const QUrl& baseUrl = QUrl("file://")) {
         noteViewer->setHtml(html, baseUrl);
     }
     void giveViewerFocus() {
