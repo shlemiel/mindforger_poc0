@@ -1781,11 +1781,16 @@ void MainWindowPresenter::doActionEditPasteImageData(QImage image)
         pathPrefix = QString::fromStdString(oPath);
     }
     pathPrefix.append(".");
-    QString pathSuffix{"image.png"};
-    QString path = pathPrefix + pathSuffix;
+
+    QDateTime date = QDateTime::currentDateTime();
+    QString formattedTime = date.toString("yyyyddmm_hhmmss");
+
+    QString pathSuffix{formattedTime};
+    QString pathExt{".png"};
+    QString path = pathPrefix + pathSuffix + pathExt;
     while(isDirectoryOrFileExists(path.toStdString().c_str())) {
-        pathSuffix.prepend("_");
-        path = pathPrefix + pathSuffix;
+        pathSuffix.append("_");
+        path = pathPrefix + pathSuffix + pathExt;
     }
 
     statusBar->showInfo(tr("Saving pasted image data to file: '%1'").arg(path.toStdString().c_str()));
