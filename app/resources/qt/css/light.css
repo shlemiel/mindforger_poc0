@@ -57,6 +57,7 @@ h6 tt, h6 code {
   font-size: inherit; }
 
 h1 {
+  user-select: none;
   font-size: 28px;
   color: black; }
 
