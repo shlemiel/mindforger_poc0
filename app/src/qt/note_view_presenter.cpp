@@ -38,6 +38,8 @@ NoteViewPresenter::NoteViewPresenter(NoteView* view, OrlojPresenter* orloj)
     this->model = new NoteViewModel();
     this->view->setModel(this->model);
 
+    connect(view, &NoteView::signalReceiveText, this, &NoteViewPresenter::slotReceiveText);
+
     this->markdownRepresentation
         = orloj->getMainPresenter()->getMarkdownRepresentation();
     this->htmlRepresentation
@@ -71,6 +73,11 @@ NoteViewPresenter::~NoteViewPresenter()
     if(htmlRepresentation) delete htmlRepresentation;
 }
 
+void NoteViewPresenter::slotReceiveText(const QString& text)
+{
+    orloj->getNoteEdit()->getView()->setDescription(text);
+}
+
 void NoteViewPresenter::refreshLivePreview()
 {
     MF_DEBUG("Refreshing N HTML preview from editor: " << this->currentNote->getName() << endl);
@@ -80,52 +87,96 @@ void NoteViewPresenter::refreshLivePreview()
     auxNote.setName(orloj->getNoteEdit()->getView()->getName().toStdString());
 
     QString description = orloj->getNoteEdit()->getView()->getDescription();
-    string s{description.toStdString()};
-    vector<string*> d{};
-    orloj->getMainPresenter()->getMarkdownRepresentation()->description(&s, d);
-    auxNote.setDescription(d);
 
-    double yScrollPct{0};
-    QScrollBar* scrollbar = orloj->getNoteEdit()->getView()->getNoteEditor()->verticalScrollBar();
+    if(auxNote.getType()->getName() == "Diagram") {
+        QString diagramText =
+            "<!DOCTYPE html>"
+            "<html>"
+            "<body>"
+            "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
+            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+            "<script>"
+            "var jshelper = null;"
+            "var xmlData = atob('$$xmlData$$');"
+            "new QWebChannel(qt.webChannelTransport, function (channel) {"
+            "jshelper = channel.objects.jshelper;"
+            "});"
+            "var iframe = document.querySelector('iframe');"
+            "var drawIoWindow = iframe.contentWindow;"
+            "window.onbeforeunload = () => { iframe.parentNode.removeChild(iframe); };"
+            "var receive = function(evt) {"
+            "  if (evt.data.length > 0 && evt.source == drawIoWindow) {"
+            "    var msg = JSON.parse(evt.data);"
+            "    if (msg.event == 'init') {"
+            "      drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "    }"
+            "    else if (msg.event == 'save') {"
+            "      drawIoWindow.postMessage(JSON.stringify({action: 'export', format: 'xmlpng', spinKey: 'saving'}), '*');"
+            "    }"
+            "    else if (msg.event == 'export') {"
+            "      xmlData = msg.data;"
+            "      jshelper.receiveText(xmlData);"
+            "    }"
+            "  }"
+            "};"
+            "window.addEventListener('message', receive);"
+            "</script>"
+            "</body>"
+            "</html>";
+
+        diagramText.replace("$$xmlData$$", description.toUtf8().toBase64());
+        view->setHtml(diagramText);
+    }
+    else {
+        string s{description.toStdString()};
+        vector<string*> d{};
+        orloj->getMainPresenter()->getMarkdownRepresentation()->description(&s, d);
+        auxNote.setDescription(d);
+
+        double yScrollPct{0};
+        QScrollBar* scrollbar = orloj->getNoteEdit()->getView()->getNoteEditor()->verticalScrollBar();
 #if defined(_WIN32) || defined(__APPLE__)
-    // WebEngine: scroll to same pct view
-    if(scrollbar) {
-        if(scrollbar->maximum()) {
-            // scroll: QWebEngine API for scrolling is not available - JavaScript must be used instead (via signal)
-            yScrollPct =
-                static_cast<double>(scrollbar->value())
+        // WebEngine: scroll to same pct view
+        if(scrollbar) {
+            if(scrollbar->maximum()) {
+                // scroll: QWebEngine API for scrolling is not available - JavaScript must be used instead (via signal)
+                yScrollPct =
+                    static_cast<double>(scrollbar->value())
                     /
-                (static_cast<double>(scrollbar->maximum())/100.0);
+                    (static_cast<double>(scrollbar->maximum())/100.0);
+            }
         }
-    }
 #endif
 
-    // refresh N HTML view (autolinking intentionally disabled)
-    htmlRepresentation->to(
-        &auxNote,
-        &html,
-        false,
-        static_cast<int>(yScrollPct)
-    );
-    view->setHtml(QString::fromStdString(html));
+        // refresh N HTML view (autolinking intentionally disabled)
+        htmlRepresentation->to(
+            &auxNote,
+            &html,
+            false,
+            static_cast<int>(yScrollPct)
+            );
 
-    // IMPROVE share code between O header and N
+        view->setHtml(QString::fromStdString(html));
+
+
+// IMPROVE share code between O header and N
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(MF_QT_WEB_ENGINE)
-    // WebView: scroll to same pct view
-    if(scrollbar) {
-        if(scrollbar->maximum()) {
-            yScrollPct =
-                static_cast<double>(scrollbar->value())
+        // WebView: scroll to same pct view
+        if(scrollbar) {
+            if(scrollbar->maximum()) {
+                yScrollPct =
+                    static_cast<double>(scrollbar->value())
                     /
-                (static_cast<double>(scrollbar->maximum())/100.0);
-            // scroll
-            QWebFrame* webFrame=view->getViever()->page()->mainFrame();
-            webFrame->setScrollPosition(QPoint(
-                0,
-                static_cast<int>((webFrame->scrollBarMaximum(Qt::Orientation::Vertical)/100.0)*yScrollPct)));
+                    (static_cast<double>(scrollbar->maximum())/100.0);
+                // scroll
+                QWebFrame* webFrame=view->getViever()->page()->mainFrame();
+                webFrame->setScrollPosition(QPoint(
+                    0,
+                    static_cast<int>((webFrame->scrollBarMaximum(Qt::Orientation::Vertical)/100.0)*yScrollPct)));
+            }
         }
-    }
 #endif
+    }
 }
 
 // IMPROVE first decorate MD with HTML colors > then MD to HTML conversion
@@ -134,9 +185,50 @@ void NoteViewPresenter::refresh(Note* note)
     note->makeRead();
     this->currentNote = note;
 
-    // HTML
-    htmlRepresentation->to(note, &html, Configuration::getInstance().isAutolinking());
-    view->setHtml(QString::fromStdString(html));
+    if(this->currentNote->getType()->getName() == "Diagram") {
+        QString diagramText =
+            "<!DOCTYPE html>"
+            "<html>"
+            "<body>"
+            "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
+            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&lightbox=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+            "<script>"
+            "var jshelper = null;"
+            "var xmlData = atob('$$xmlData$$');"
+            "new QWebChannel(qt.webChannelTransport, function (channel) {"
+            "jshelper = channel.objects.jshelper;"
+            "});"
+            "var iframe = document.querySelector('iframe');"
+            "var drawIoWindow = iframe.contentWindow;"
+            "window.onbeforeunload = () => { iframe.parentNode.removeChild(iframe); };"
+            "var receive = function(evt) {"
+            "  if (evt.data.length > 0 && evt.source == drawIoWindow) {"
+            "    var msg = JSON.parse(evt.data);"
+            "    if (msg.event == 'init') {"
+            "      drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "    }"
+            "    else if (msg.event == 'save') {"
+            "      drawIoWindow.postMessage(JSON.stringify({action: 'export', format: 'xmlpng', spinKey: 'saving'}), '*');"
+            "    }"
+            "    else if (msg.event == 'export') {"
+            "      xmlData = msg.data;"
+            "      jshelper.receiveText(xmlData);"
+            "    }"
+            "  }"
+            "};"
+            "window.addEventListener('message', receive);"
+            "</script>"
+            "</body>"
+            "</html>";
+
+        diagramText.replace("$$xmlData$$", QString::fromStdString(this->currentNote->getDescriptionAsString()).toUtf8().toBase64());
+        view->setHtml(diagramText);
+    }
+    else {
+        // HTML
+        htmlRepresentation->to(note, &html, Configuration::getInstance().isAutolinking());
+        view->setHtml(QString::fromStdString(html));
+    }
 
     // leaderboard
     mind->associate();

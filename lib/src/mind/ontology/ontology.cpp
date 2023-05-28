@@ -90,6 +90,7 @@ Ontology::Ontology()
     noteTypeTaxonomy.setIsA(&thing);
     this->defaultNoteType = new NoteType{NoteType::KeyNote(), &noteTypeTaxonomy, Color::MF_GRAY()};
     noteTypeTaxonomy.add(NoteType::KeyNote(), defaultNoteType);
+    noteTypeTaxonomy.add(NoteType::KeyDiagram(), new NoteType{NoteType::KeyDiagram(), &noteTypeTaxonomy, Color::MF_GRAY()});
     noteTypeTaxonomy.add(NoteType::KeyAction(), new NoteType{NoteType::KeyAction(), &noteTypeTaxonomy, Color::MF_GRAY()});
     noteTypeTaxonomy.add(NoteType::KeyConclusion(), new NoteType{NoteType::KeyConclusion(), &noteTypeTaxonomy, Color::MF_GRAY()});
     noteTypeTaxonomy.add(NoteType::KeyExperience(), new NoteType{NoteType::KeyExperience(), &noteTypeTaxonomy, Color::MF_GRAY()});

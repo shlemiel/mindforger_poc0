@@ -17,14 +17,19 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "note_view.h"
-
 namespace m8r {
 
 using namespace std;
 
+
+void JSHelper::receiveText(const QString& text)
+{
+    emit dynamic_cast<NoteViewerView*>(o)->signalReceiveText(text);
+}
+
 NoteViewerView::NoteViewerView(QWidget *parent)
 #ifdef MF_QT_WEB_ENGINE
-    : QWebEngineView(parent)
+    : QWebEngineView(parent), helper(this)
 #else
     : QWebView(parent)
 #endif
@@ -33,6 +38,10 @@ NoteViewerView::NoteViewerView(QWidget *parent)
     // ensure that link clicks are not handled, but delegated to MF using linkClicked signal
     WebEnginePageLinkNavigationPolicy* p = new WebEnginePageLinkNavigationPolicy{this};
     setPage(p);
+
+    QWebChannel* channel = new QWebChannel(p);
+    p->setWebChannel(channel);
+    channel->registerObject(QStringLiteral("jshelper"), &this->helper);
 #else
     // ensure that link clicks are not handled, but delegated to MF using linkClicked signal
     page()->setLinkDelegationPolicy(QWebPage::LinkDelegationPolicy::DelegateAllLinks);
@@ -144,6 +153,8 @@ NoteView::NoteView(QWidget* parent)
 {
     // widgets
     noteViewer = new NoteViewerView{this};
+    connect(noteViewer, &NoteViewerView::signalReceiveText, this, &NoteView::slotReceiveText);
+
     view2EditPanel = new ViewToEditEditButtonsPanel{MfWidgetMode::NOTE_MODE, this};
 
     // assembly
@@ -180,6 +191,11 @@ void NoteView::keyPressEvent(QKeyEvent* event)
 void NoteView::slotOpenEditor()
 {
     emit signalOpenEditor();
+}
+
+void NoteView::slotReceiveText(const QString& text)
+{
+    emit signalReceiveText(text);
 }
 
 } // m8r namespace

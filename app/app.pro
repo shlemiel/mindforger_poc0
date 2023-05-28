@@ -469,7 +469,10 @@ TRANSLATIONS = \
     ./resources/qt/translations/mindforger_cs.ts
 
 RESOURCES += \
-    ./mf-resources.qrc
+    ./mf-resources.qrc \
+    drawio.qrc
+
+QTQUICK_COMPILER_SKIPPED_RESOURCES += drawio.qrc
 
 # ########################################
 # Linux installation: make install

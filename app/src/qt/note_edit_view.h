@@ -61,6 +61,15 @@ public:
         // TODO configuration
         noteEditor->enableSpellCheck(true);
         noteEditor->setPlainText(QString::fromStdString(mdDescription));
+        if(note->getType()->getName() == "Diagram") {
+            noteEditor->setEnabled(false);
+        }
+        else {
+            noteEditor->setEnabled(true);
+        }
+    }
+    void setDescription(const QString& description) {
+        noteEditor->setPlainText(description);
     }
     void setEditorShowLineNumbers(bool show) { noteEditor->setShowLineNumbers(show); }
     void setStatusBar(const StatusBarView* statusBar) { noteEditor->setStatusBar(statusBar); }

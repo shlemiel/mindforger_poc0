@@ -7,3 +7,6 @@
 [submodule "deps/cmark-gfm"]
 	path = deps/cmark-gfm
 	url = https://github.com/dvorka/cmark.git
+[submodule "app/resources/deps/drawio"]
+	path = app/resources/deps/drawio
+	url = https://github.com/jgraph/drawio

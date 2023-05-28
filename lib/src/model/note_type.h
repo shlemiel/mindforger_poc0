@@ -35,6 +35,10 @@ public:
         static const std::string KEY_NOTE = std::string{"Note"};
         return KEY_NOTE;
     }
+    static const std::string& KeyDiagram() {
+        static const std::string KEY_DIAGRAM = std::string{"Diagram"};
+        return KEY_DIAGRAM;
+    }
     static const std::string& KeyIdea() {
         static const std::string KEY_IDEA = std::string{"Idea"};
         return KEY_IDEA;

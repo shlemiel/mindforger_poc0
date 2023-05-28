@@ -29,6 +29,7 @@
 
 #include <QtWidgets>
 #ifdef MF_QT_WEB_ENGINE
+  #include <QWebChannel>
   #include <QWebEngineView>
   #include "web_engine_page_link_navigation_policy.h"
 #else
@@ -37,6 +38,32 @@
 #include <QUrl>
 
 namespace m8r {
+
+class NoteViewerView;
+class JSHelper : public QObject
+{
+    Q_OBJECT
+
+    QObject* o;
+
+public:
+    explicit JSHelper(QObject *o)
+        : QObject(nullptr), o(o)
+    {
+    }
+
+signals:
+    /*!
+        This signal is emitted from the C++ side and the text displayed on the HTML client side.
+    */
+    void sendText(const QString &text);
+
+public slots:
+    /*!
+        This slot is invoked from the HTML client side and the text displayed on the server side.
+    */
+    void receiveText(const QString &text);
+};
 
 #ifdef MF_QT_WEB_ENGINE
 class NoteViewerView: public QWebEngineView
@@ -59,6 +86,9 @@ public:
 protected:
     bool event(QEvent* evt) override;
     bool eventFilter(QObject *obj, QEvent *ev) override;
+
+    JSHelper helper;
+
 #else
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
 #endif
@@ -68,6 +98,7 @@ protected:
 signals:
     void signalMouseDoubleClickEvent();
     void signalFromViewNoteToOutlines();
+    void signalReceiveText(const QString& text);
 };
 
 class NoteView : public QWidget
@@ -110,9 +141,11 @@ protected:
 
 private slots:
     void slotOpenEditor();
+    void slotReceiveText(const QString& text);
 
 signals:
     void signalOpenEditor();
+    void signalReceiveText(const QString& text);
 };
 
 }
