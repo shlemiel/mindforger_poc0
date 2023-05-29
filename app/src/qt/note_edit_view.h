@@ -59,7 +59,8 @@ public:
         topNamePanel->setNote(note);
         bottomButtonsPanel->setNote(note);
         // TODO configuration
-        noteEditor->enableSpellCheck(true);
+        noteEditor->enableSpellCheck(false);
+        QString x = QString("x").repeated(1024 * 64);
         noteEditor->setPlainText(QString::fromStdString(mdDescription));
         if(note->getType()->getName() == "Diagram") {
             noteEditor->setEnabled(false);

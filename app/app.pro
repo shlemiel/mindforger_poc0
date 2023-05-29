@@ -470,9 +470,9 @@ TRANSLATIONS = \
 
 RESOURCES += \
     ./mf-resources.qrc \
-    drawio.qrc
+    ./drawio.qrc
 
-QTQUICK_COMPILER_SKIPPED_RESOURCES += drawio.qrc
+QTQUICK_COMPILER_SKIPPED_RESOURCES += ./drawio.qrc
 
 # ########################################
 # Linux installation: make install

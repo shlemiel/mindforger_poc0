@@ -20,3 +20,5 @@ TEST_LOG*.*
 compile_commands.json
 .qmake.stash
 .DS_Store
+.qtc_clangd
+qrc_*.cpp
