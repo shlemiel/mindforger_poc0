@@ -21,6 +21,10 @@ namespace m8r {
 
 using namespace std;
 
+void JSHelper::exit()
+{
+    emit dynamic_cast<NoteViewerView*>(o)->signalExit();
+}
 
 void JSHelper::receiveText(const QString& text)
 {
@@ -154,6 +158,7 @@ NoteView::NoteView(QWidget* parent)
     // widgets
     noteViewer = new NoteViewerView{this};
     connect(noteViewer, &NoteViewerView::signalReceiveText, this, &NoteView::slotReceiveText);
+    connect(noteViewer, &NoteViewerView::signalExit, this, &NoteView::slotExit);
 
     view2EditPanel = new ViewToEditEditButtonsPanel{MfWidgetMode::NOTE_MODE, this};
 
@@ -196,6 +201,11 @@ void NoteView::slotOpenEditor()
 void NoteView::slotReceiveText(const QString& text)
 {
     emit signalReceiveText(text);
+}
+
+void NoteView::slotExit()
+{
+    emit signalExit();
 }
 
 } // m8r namespace

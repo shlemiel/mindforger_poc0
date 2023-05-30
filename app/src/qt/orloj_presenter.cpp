@@ -630,13 +630,14 @@ void OrlojPresenter::showFacetNoteEdit(Note* note)
     }
 
     if(mainPresenter->withWriteableOutline(note->getOutline()->getKey())) {
+        bool isDiagram = note->getType()->getName() == "Diagram";
         noteEditPresenter->setNote(note);
-        view->showFacetNoteEdit();
+        view->showFacetNoteEdit(isDiagram);
         setFacet(OrlojPresenterFacets::FACET_EDIT_NOTE);
         mainPresenter->getMainMenu()->showFacetNoteEdit();
 
         // refresh live preview to ensure on/off autolinking, full O vs. header, ...
-        if(config.isUiLiveNotePreview()) {
+        if(isDiagram || config.isUiLiveNotePreview()) {
             noteViewPresenter->refreshLivePreview();
         }
 
@@ -698,7 +699,8 @@ bool OrlojPresenter::applyFacetHoisting()
         } else if(isFacetActive(OrlojPresenterFacets::FACET_VIEW_NOTE)) {
             view->showFacetNoteView();
         } else if(isFacetActive(OrlojPresenterFacets::FACET_EDIT_NOTE)) {
-            view->showFacetNoteEdit();
+            bool isDiagram = getNoteView()->getCurrentNote()->getType()->getName() == "Diagram";
+            view->showFacetNoteEdit(isDiagram);
         } else if(isFacetActive(OrlojPresenterFacets::FACET_EDIT_OUTLINE_HEADER)) {
             view->showFacetOutlineHeaderEdit();
         }
@@ -975,7 +977,8 @@ void OrlojPresenter::slotShowRecentNote(const QItemSelection& selected, const QI
 void OrlojPresenter::refreshLiveNotePreview()
 {
     if(isFacetActive(OrlojPresenterFacets::FACET_EDIT_NOTE)) {
-        view->showFacetNoteEdit();
+        bool isDiagram = getNoteView()->getCurrentNote()->getType()->getName() == "Diagram";
+        view->showFacetNoteEdit(isDiagram);
     } else if(isFacetActive(OrlojPresenterFacets::FACET_EDIT_OUTLINE_HEADER)) {
         view->showFacetOutlineHeaderEdit();
     }

@@ -194,18 +194,25 @@ void OrlojView::showFacetNoteView()
     }
 }
 
-void OrlojView::showFacetNoteEdit()
+void OrlojView::showFacetNoteEdit(bool isDiagram)
 {
     if(menuView->actionViewHoist->isChecked()) {
         showFacetHoistedNoteEdit();
     } else {
-        if(menuView->actionEditLiveNotePreview->isChecked()) {
+        if(isDiagram) {
             noteView->getButtonsPanel()->setVisible(false);
-            QSet<QWidget*> v; v << noteView << noteEdit;
+            QSet<QWidget*> v; v << noteView;
             hideChildren(v);
-        } else {
-            QSet<QWidget*> v; v << outlineView << noteEdit;
-            hideChildren(v);
+        }
+        else {
+            if(menuView->actionEditLiveNotePreview->isChecked()) {
+                noteView->getButtonsPanel()->setVisible(false);
+                QSet<QWidget*> v; v << noteView << noteEdit;
+                hideChildren(v);
+            } else {
+                QSet<QWidget*> v; v << outlineView << noteEdit;
+                hideChildren(v);
+            }
         }
 
         noteEdit->giveEditorFocus();

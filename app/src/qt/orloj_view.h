@@ -159,7 +159,7 @@ public:
     /**
      * @brief Note edit
      */
-    void showFacetNoteEdit();
+    void showFacetNoteEdit(bool isDiagram);
 
     /**
      * @brief Knowledge graph navigator

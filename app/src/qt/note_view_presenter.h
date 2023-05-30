@@ -86,6 +86,7 @@ public slots:
     void slotEditNoteDoubleClick();
     void slotRefreshLeaderboardByValue(AssociatedNotes* associations);
     void slotReceiveText(const QString& text);
+    void slotExit();
 };
 
 } // m8r namespace

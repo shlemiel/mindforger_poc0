@@ -63,6 +63,7 @@ public slots:
         This slot is invoked from the HTML client side and the text displayed on the server side.
     */
     void receiveText(const QString &text);
+    void exit();
 };
 
 #ifdef MF_QT_WEB_ENGINE
@@ -99,6 +100,7 @@ signals:
     void signalMouseDoubleClickEvent();
     void signalFromViewNoteToOutlines();
     void signalReceiveText(const QString& text);
+    void signalExit();
 };
 
 class NoteView : public QWidget
@@ -142,10 +144,12 @@ protected:
 private slots:
     void slotOpenEditor();
     void slotReceiveText(const QString& text);
+    void slotExit();
 
 signals:
     void signalOpenEditor();
     void signalReceiveText(const QString& text);
+    void signalExit();
 };
 
 }

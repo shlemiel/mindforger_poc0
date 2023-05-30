@@ -39,6 +39,7 @@ NoteViewPresenter::NoteViewPresenter(NoteView* view, OrlojPresenter* orloj)
     this->view->setModel(this->model);
 
     connect(view, &NoteView::signalReceiveText, this, &NoteViewPresenter::slotReceiveText);
+    connect(view, &NoteView::signalExit, this, &NoteViewPresenter::slotExit);
 
     this->markdownRepresentation
         = orloj->getMainPresenter()->getMarkdownRepresentation();
@@ -78,6 +79,11 @@ void NoteViewPresenter::slotReceiveText(const QString& text)
     orloj->getNoteEdit()->getView()->setDescription(text);
 }
 
+void NoteViewPresenter::slotExit()
+{
+    orloj->getNoteEdit()->slotSaveAndCloseEditor();
+}
+
 void NoteViewPresenter::refreshLivePreview()
 {
     MF_DEBUG("Refreshing N HTML preview from editor: " << this->currentNote->getName() << endl);
@@ -94,7 +100,7 @@ void NoteViewPresenter::refreshLivePreview()
             "<html>"
             "<body>"
             "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
-            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
             "<script>"
             "var jshelper = null;"
             "var xmlData = atob('$$xmlData$$');"
@@ -116,6 +122,9 @@ void NoteViewPresenter::refreshLivePreview()
             "    else if (msg.event == 'export') {"
             "      xmlData = msg.data;"
             "      jshelper.receiveText(xmlData);"
+            "    }"
+            "    else if (msg.event == 'exit') {"
+            "      jshelper.exit();"
             "    }"
             "  }"
             "};"
