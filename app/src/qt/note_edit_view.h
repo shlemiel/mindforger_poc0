@@ -60,11 +60,13 @@ public:
         bottomButtonsPanel->setNote(note);
         // TODO configuration
         noteEditor->enableSpellCheck(false);
-        noteEditor->setPlainText(QString::fromStdString(mdDescription));
+
         if(note->getType()->getName() == "Diagram") {
+            noteEditor->setPlainText("<unused>");
             noteEditor->setEnabled(false);
         }
         else {
+            noteEditor->setPlainText(QString::fromStdString(mdDescription));
             noteEditor->setEnabled(true);
         }
     }

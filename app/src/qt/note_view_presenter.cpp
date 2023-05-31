@@ -76,12 +76,17 @@ NoteViewPresenter::~NoteViewPresenter()
 
 void NoteViewPresenter::slotReceiveText(const QString& text)
 {
-    orloj->getNoteEdit()->getView()->setDescription(text);
+    string s{string{"![diagram]("} + text.toStdString() + string{")"}};
+    vector<string*> d{};
+    markdownRepresentation->description(&s, d);
+    currentNote->setDescription(d);
+    currentNote->makeModified();
+    this->mind->remember(currentNote->getOutlineKey());
 }
 
 void NoteViewPresenter::slotExit()
 {
-    orloj->getNoteEdit()->slotSaveAndCloseEditor();
+    orloj->getNoteEdit()->slotCloseEditor();
 }
 
 void NoteViewPresenter::refreshLivePreview()
@@ -92,9 +97,16 @@ void NoteViewPresenter::refreshLivePreview()
     Note auxNote{currentNote->getType(), currentNote->getOutline()};
     auxNote.setName(orloj->getNoteEdit()->getView()->getName().toStdString());
 
-    QString description = orloj->getNoteEdit()->getView()->getDescription();
-
     if(auxNote.getType()->getName() == "Diagram") {
+        QString description = QString::fromStdString(currentNote->getDescriptionAsString());
+
+        if(description.length() > 12) {
+            description = description.mid(11, description.length() - 13);
+        }
+        else {
+            description = "";
+        }
+
         QString diagramText =
             "<!DOCTYPE html>"
             "<html>"
@@ -137,6 +149,8 @@ void NoteViewPresenter::refreshLivePreview()
         view->setHtml(diagramText);
     }
     else {
+        QString description = orloj->getNoteEdit()->getView()->getDescription();
+
         string s{description.toStdString()};
         vector<string*> d{};
         orloj->getMainPresenter()->getMarkdownRepresentation()->description(&s, d);
@@ -195,6 +209,15 @@ void NoteViewPresenter::refresh(Note* note)
     this->currentNote = note;
 
     if(this->currentNote->getType()->getName() == "Diagram") {
+        QString description = QString::fromStdString(currentNote->getDescriptionAsString());
+
+        if(description.length() > 12) {
+            description = description.mid(11, description.length() - 13);
+        }
+        else {
+            description = "";
+        }
+
         QString diagramText =
             "<!DOCTYPE html>"
             "<html>"
@@ -230,7 +253,7 @@ void NoteViewPresenter::refresh(Note* note)
             "</body>"
             "</html>";
 
-        diagramText.replace("$$xmlData$$", QString::fromStdString(this->currentNote->getDescriptionAsString()).toUtf8().toBase64());
+        diagramText.replace("$$xmlData$$", description.toUtf8().toBase64());
         view->setHtml(diagramText);
     }
     else {
