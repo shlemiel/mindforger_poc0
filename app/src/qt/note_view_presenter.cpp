@@ -110,9 +110,9 @@ void NoteViewPresenter::refreshLivePreview()
         QString diagramHtml =
             "<!DOCTYPE html>"
             "<html>"
-            "<body>"
+            "<body style='background: #18141d;'>"
             "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
-            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json' style='background: #18141d; position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
             "<script>"
             "var initReceived = false;"
             "var xmlReceived = false;"
@@ -233,9 +233,9 @@ void NoteViewPresenter::refresh(Note* note)
         QString diagramHtml =
             "<!DOCTYPE html>"
             "<html>"
-            "<body>"
+            "<body style='background: #18141d;'>"
             "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
-            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&lightbox=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+            "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&lightbox=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='background: #18141d; position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
             "<script>"
             "var initReceived = false;"
             "var xmlReceived = false;"
