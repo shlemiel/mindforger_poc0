@@ -31,6 +31,11 @@ void JSHelper::receiveText(const QString& text)
     emit dynamic_cast<NoteViewerView*>(o)->signalReceiveText(text);
 }
 
+void JSHelper::requestXmlData()
+{
+    emit sendText(dynamic_cast<NoteViewerView*>(o)->xmlData);
+}
+
 NoteViewerView::NoteViewerView(QWidget *parent)
 #ifdef MF_QT_WEB_ENGINE
     : QWebEngineView(parent), helper(this)

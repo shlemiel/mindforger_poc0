@@ -64,6 +64,7 @@ public slots:
     */
     void receiveText(const QString &text);
     void exit();
+    void requestXmlData();
 };
 
 #ifdef MF_QT_WEB_ENGINE
@@ -81,14 +82,19 @@ public:
     NoteViewerView &operator=(const NoteViewerView&) = delete;
     NoteViewerView &operator=(const NoteViewerView&&) = delete;
 
+    JSHelper helper;
+    QString xmlData;
+
+    void setXmlData(QString& xmlData) {
+        this->xmlData = xmlData;
+    }
+
 #ifdef MF_QT_WEB_ENGINE
     QWebEnginePage* getPage() const { return page(); }
 
 protected:
     bool event(QEvent* evt) override;
     bool eventFilter(QObject *obj, QEvent *ev) override;
-
-    JSHelper helper;
 
 #else
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;

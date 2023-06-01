@@ -107,26 +107,38 @@ void NoteViewPresenter::refreshLivePreview()
             description = "";
         }
 
-        QString diagramText =
+        QString diagramHtml =
             "<!DOCTYPE html>"
             "<html>"
             "<body>"
             "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
             "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&ui=dark&spin=0&proto=json' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
             "<script>"
+            "var initReceived = false;"
+            "var xmlReceived = false;"
             "var jshelper = null;"
-            "var xmlData = atob('$$xmlData$$');"
-            "new QWebChannel(qt.webChannelTransport, function (channel) {"
-            "jshelper = channel.objects.jshelper;"
-            "});"
+            "var xmlData = '';"
             "var iframe = document.querySelector('iframe');"
             "var drawIoWindow = iframe.contentWindow;"
+            "function assertAndCheck(init, xml) {"
+            "  initReceived |= init;"
+            "  xmlReceived |= xml;"
+            "  if(initReceived && xmlReceived) {"
+            "    drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "  }"
+            "}"
+            "new QWebChannel(qt.webChannelTransport, function (channel) {"
+            "  jshelper = channel.objects.jshelper;"
+            "  jshelper.sendText.connect(function(x) { xmlData = x; assertAndCheck(false, true); });"
+            "  jshelper.requestXmlData();"
+            "});"
             "window.onbeforeunload = () => { iframe.parentNode.removeChild(iframe); };"
             "var receive = function(evt) {"
             "  if (evt.data.length > 0 && evt.source == drawIoWindow) {"
             "    var msg = JSON.parse(evt.data);"
             "    if (msg.event == 'init') {"
-            "      drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "      assertAndCheck(true, false);"
+            "      initReceived = true;"
             "    }"
             "    else if (msg.event == 'save') {"
             "      drawIoWindow.postMessage(JSON.stringify({action: 'export', format: 'xmlpng', spinKey: 'saving'}), '*');"
@@ -145,8 +157,8 @@ void NoteViewPresenter::refreshLivePreview()
             "</body>"
             "</html>";
 
-        diagramText.replace("$$xmlData$$", description.toUtf8().toBase64());
-        view->setHtml(diagramText);
+        view->getViever()->setXmlData(description);
+        view->setHtml(diagramHtml);
     }
     else {
         QString description = orloj->getNoteEdit()->getView()->getDescription();
@@ -218,26 +230,38 @@ void NoteViewPresenter::refresh(Note* note)
             description = "";
         }
 
-        QString diagramText =
+        QString diagramHtml =
             "<!DOCTYPE html>"
             "<html>"
             "<body>"
             "<script src='qrc:///qtwebchannel/qwebchannel.js'></script>"
             "<iframe src='qrc:///drawio/resources/deps/drawio/src/main/webapp/index.html?embed=1&lightbox=1&ui=dark&spin=0&proto=json&noExitBtn=1' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
             "<script>"
+            "var initReceived = false;"
+            "var xmlReceived = false;"
             "var jshelper = null;"
-            "var xmlData = atob('$$xmlData$$');"
-            "new QWebChannel(qt.webChannelTransport, function (channel) {"
-            "jshelper = channel.objects.jshelper;"
-            "});"
+            "var xmlData = '';"
             "var iframe = document.querySelector('iframe');"
             "var drawIoWindow = iframe.contentWindow;"
+            "function assertAndCheck(init, xml) {"
+            "  initReceived |= init;"
+            "  xmlReceived |= xml;"
+            "  if(initReceived && xmlReceived) {"
+            "    drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "  }"
+            "}"
+            "new QWebChannel(qt.webChannelTransport, function (channel) {"
+            "  jshelper = channel.objects.jshelper;"
+            "  jshelper.sendText.connect(function(x) { xmlData = x; assertAndCheck(false, true); });"
+            "  jshelper.requestXmlData();"
+            "});"
             "window.onbeforeunload = () => { iframe.parentNode.removeChild(iframe); };"
             "var receive = function(evt) {"
             "  if (evt.data.length > 0 && evt.source == drawIoWindow) {"
             "    var msg = JSON.parse(evt.data);"
             "    if (msg.event == 'init') {"
-            "      drawIoWindow.postMessage(JSON.stringify({action: 'load', xmlpng: xmlData}), '*');"
+            "      assertAndCheck(true, false);"
+            "      initReceived = true;"
             "    }"
             "    else if (msg.event == 'save') {"
             "      drawIoWindow.postMessage(JSON.stringify({action: 'export', format: 'xmlpng', spinKey: 'saving'}), '*');"
@@ -246,6 +270,9 @@ void NoteViewPresenter::refresh(Note* note)
             "      xmlData = msg.data;"
             "      jshelper.receiveText(xmlData);"
             "    }"
+            "    else if (msg.event == 'exit') {"
+            "      jshelper.exit();"
+            "    }"
             "  }"
             "};"
             "window.addEventListener('message', receive);"
@@ -253,8 +280,8 @@ void NoteViewPresenter::refresh(Note* note)
             "</body>"
             "</html>";
 
-        diagramText.replace("$$xmlData$$", description.toUtf8().toBase64());
-        view->setHtml(diagramText);
+        view->getViever()->setXmlData(description);
+        view->setHtml(diagramHtml);
     }
     else {
         // HTML
