@@ -98,10 +98,10 @@ void NoteViewPresenter::refreshLivePreview()
     auxNote.setName(orloj->getNoteEdit()->getView()->getName().toStdString());
 
     if(auxNote.getType()->getName() == "Diagram") {
-        QString description = QString::fromStdString(currentNote->getDescriptionAsString());
+        QString description = QString::fromStdString(currentNote->getDescriptionAsString()).trimmed();
 
-        if(description.length() > 12) {
-            description = description.mid(11, description.length() - 13);
+        if(description.length() > 12 && description.left(11) == QString("![diagram](") && description.right(1) == ")") {
+            description = description.mid(11, description.length() - 12);
         }
         else {
             description = "";
@@ -221,10 +221,10 @@ void NoteViewPresenter::refresh(Note* note)
     this->currentNote = note;
 
     if(this->currentNote->getType()->getName() == "Diagram") {
-        QString description = QString::fromStdString(currentNote->getDescriptionAsString());
+        QString description = QString::fromStdString(currentNote->getDescriptionAsString()).trimmed();
 
-        if(description.length() > 12) {
-            description = description.mid(11, description.length() - 13);
+        if(description.length() > 12 && description.left(11) == QString("![diagram](") && description.right(1) == ")") {
+            description = description.mid(11, description.length() - 12);
         }
         else {
             description = "";
